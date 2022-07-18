@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 
 SCHEMA = """
@@ -24,7 +25,7 @@ values (:galnet_guid, :galnet_date, :news_body, :title, :picture_name, :publishe
 
 class Model:
     def __init__(self):
-        self.db = sqlite3.connect('galnet_ru.sqlite')
+        self.db = sqlite3.connect(os.environ['VOX_SQLITE_PATH'])
         self.db.execute(SCHEMA)
         self.db.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
 
