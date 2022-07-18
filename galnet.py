@@ -24,7 +24,18 @@ def russify_date(galnet_date: str) -> str:
     galnet_date_splited = galnet_date.split(' ')
     month = galnet_date_splited[1]
     months_dict = {
-        'JUL': 'Июл'  # TODO: other months
+        'JAN': 'Янв',
+        'FEB': 'Фев',
+        'MAR': 'Мар',
+        'APR': 'Апр',
+        'MAY': 'Май',
+        'JUN': 'Июн',
+        'JUL': 'Июл',
+        'AUG': 'Авг',
+        'SEP': 'Сен',
+        'OCT': 'Окт',
+        'NOV': 'Ноя',
+        'DEC': 'Дек'
     }
 
     russified_month = months_dict.get(month, month)
