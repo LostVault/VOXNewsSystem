@@ -1,5 +1,7 @@
 import sqlite3
 import os
+from dataclasses import asdict
+import galnet
 
 
 SCHEMA = """
@@ -29,43 +31,24 @@ class Model:
         self.db.execute(SCHEMA)
         self.db.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
 
-    def check_news(self, galnet_guid: str) -> bool:
-        """Check if we have news with specified galnet_guid in DB, returns True if have, False if haven't
+    def check_news(self, news_to_check: galnet.OneNews) -> bool:
+        """Check if we have specified news in DB, returns True if we have, False if we don't
 
-        :param galnet_guid: galnet guid to check
+        :param news_to_check: galnet news
         :return:
         """
 
         with self.db:
-            sql_result = self.db.execute(CHECK_NEWS_QUERY, (galnet_guid,)).fetchone()['count']
+            sql_result = self.db.execute(CHECK_NEWS_QUERY, (news_to_check.galnet_guid,)).fetchone()['count']
             if sql_result == 0:
                 return False
 
             else:
                 return True
 
-    def save_news(self, one_news: dict) -> None:
-        """Takes one news and save it to DB
-
-        :param one_news: data[<int>] from api response
-        :return:
-        """
-        attributes: dict = one_news['attributes']
-
-        if self.check_news(attributes['field_galnet_guid']):  # don't save news if we already saved it
-            return
-
-        news_to_insert: dict = {
-            'title': attributes['title'],
-            'news_body': attributes['body']['value'],
-            'galnet_guid': attributes['field_galnet_guid'],
-            'galnet_date': attributes['field_galnet_date'],
-            'picture_name': attributes['field_galnet_image'],
-            'published_at': attributes['published_at']
-        }
-
+    def save_news(self, one_news: galnet.OneNews) -> None:
         with self.db:
-            self.db.execute(INSERT_ONE_NEWS_QUERY, news_to_insert)
+            self.db.execute(INSERT_ONE_NEWS_QUERY, asdict(one_news))
 
 
 model = Model()

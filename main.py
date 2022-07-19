@@ -34,36 +34,17 @@ class VOXGalactica(discord.Client):
         print('Starting the pull')
         try:
             channel: discord.channel.TextChannel = self.get_channel(self.channel_id)
-            for one_news in reversed(await galnet.get_news()):
-                title: str = one_news['attributes']['title']
-                if not model.check_news(one_news['attributes']['field_galnet_guid']):
-                    model.save_news(one_news)
-
-                else:
+            for one_news in reversed(await galnet.get_news(10)):
+                if model.check_news(one_news):
                     continue
 
-                print(f'Going to send {title!r}')
+                model.save_news(one_news)
 
-                body: str = one_news['attributes']['body']['value']
-                galnet_date: str = galnet.russify_date(one_news['attributes']['field_galnet_date'])
-                # galnet_image_url: str = galnet.BASE_PICTURES.format(picture=one_news['attributes']['field_galnet_image'])
-                # published_at: str = one_news['attributes']['published_at']
+                print(f'Going to send {one_news.title!r}')
+                formatted_msg = await galnet.format_news(one_news)
 
-                picture_discord_file = await galnet.get_picture(one_news['attributes']['field_galnet_image'])
-
-                body = body.replace('\n', '\n\n')
-                message = f"""⠀
-```fix
-{title}
-{galnet.russify_date(galnet_date)}
-``````
-{body}
-```"""
-                if len(message) > 2000:
-                    message = f'{title!r} > 2000 символов'
-                    picture_discord_file = None
-
-                await channel.send(message, file=picture_discord_file)
+                for part in formatted_msg:
+                    await channel.send(**part)
 
         except Exception as e:
             print(traceback.format_exc())
