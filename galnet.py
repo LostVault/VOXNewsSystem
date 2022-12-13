@@ -69,11 +69,15 @@ async def get_news(limit: int = 10) -> list[OneNews]:
             return news
 
 
-async def get_picture(name: str) -> discord.File:
+async def get_picture(name: str) -> discord.File | None:
     async with aiohttp.ClientSession() as session:
         async with session.get(BASE_PICTURES.format(picture=name)) as response:
-            pic = io.BytesIO(await response.read())
-            return discord.File(pic, filename=f'{name}.png')
+            if response.ok:
+                pic = io.BytesIO(await response.read())
+                return discord.File(pic, filename=f'{name}.png')
+
+            print(f'Failed to get_picture {name!r} with {response.status}')
+            return None
 
 
 def russify_date(galnet_date: str) -> str:
