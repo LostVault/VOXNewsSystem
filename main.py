@@ -38,13 +38,13 @@ class VOXGalactica(discord.Client):
                 if model.check_news(one_news):
                     continue
 
-                model.save_news(one_news)
-
                 print(f'Going to send {one_news.title!r}')
                 formatted_msg = await galnet.format_news(one_news)
 
                 for part in formatted_msg:
                     await channel.send(**part)
+
+                model.save_news(one_news)
 
         except Exception as e:
             print(traceback.format_exc())
